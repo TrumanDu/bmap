@@ -1,10 +1,12 @@
 import {
   uiModules
 } from 'ui/modules';
-import { VisVisTypeProvider } from 'ui/vis/vis_type';
+import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+
+import { CATEGORY } from 'ui/vis/vis_category';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { TemplateVisTypeProvider } from 'ui/template_vis_type/template_vis_type';
-import { VisSchemasProvider } from 'ui/vis/schemas';
+
 import BmapTemplate from 'plugins/bmap/bmapTemplate.html';
 import EditorTemplate from 'plugins/bmap/editor.html';
 
@@ -235,80 +237,75 @@ module.controller('BmapController', function ($scope, $injector, $window, $http,
 
 
 function BmapVisType(Private) {
-  const VisType = Private(VisVisTypeProvider);
-  const TemplateVisType = Private(TemplateVisTypeProvider);
+  const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
-  return new TemplateVisType({
+  return VisFactory.createAngularVisualization({
     name: 'echarts bmap',
     title: 'Echarts bmap',
     icon: 'fa fa-map',
     description: 'Plugin of Echarts Bmap',
-    category: VisType.CATEGORY.MAP,
-    requiresSearch: true,
-    template: BmapTemplate,
-    schemas: new Schemas([
-      {
-        group: 'metrics',
-        name: 'metric',
-        title: 'Metric',
-        aggFilter: '!geo_centroid',
-        min: 1,
-        defaults: [
-          { type: 'count', schema: 'metric' }
-        ]
-      },
-      {
-        group: 'buckets',
-        name: 'longitude',
-        title: 'Longitude',
-        min: 1,
-        max: 1,
-        aggFilter: 'terms'
-      },
-      {
-        group: 'buckets',
-        name: 'latitude',
-        title: 'Latitude',
-        min: 1,
-        max: 1,
-        aggFilter: 'terms'
-      },
-      {
-        group: 'buckets',
-        name: 'docvalue',
-        title: 'Docvalue',
-        min: 1,
-        max: 1,
-        aggFilter: 'terms'
-      },
-      {
-        group: 'buckets',
-        name: 'symbolcolor',
-        title: 'SymbolColor',
-        min: 1,
-        max: 1,
-        aggFilter: 'terms'
-      }
-      /* ,
-      {
-        group: 'buckets',
-        name: 'bucket',
-        title: 'Split Rows'
-      } */
-    ]),
-    params: {
-      editor: EditorTemplate, // Use this HTML as an options editor for this vis
-      defaults: { // Set default values for paramters (that can be configured in the editor)
+    category: CATEGORY.MAP,
+    visConfig: {
+      defaults: {
         field: 'filed1',
         color: '#fff',
         symbolSize: 100,
         bmapText: '全国主要城市空气质量 - 百度地图',
         bmapSubText: 'data from PM25.in'
-      }
-    }
+      },
+      template: BmapTemplate
+    },
+    hierarchicalData: true,
+    responseHandler: 'none',
+    editorConfig: {
+      optionsTemplate: EditorTemplate,
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Metric',
+          aggFilter: '!geo_centroid',
+          min: 1,
+          defaults: [
+            { type: 'count', schema: 'metric' }
+          ]
+        },
+        {
+          group: 'buckets',
+          name: 'longitude',
+          title: 'Longitude',
+          min: 1,
+          max: 1,
+          aggFilter: 'terms'
+        },
+        {
+          group: 'buckets',
+          name: 'latitude',
+          title: 'Latitude',
+          min: 1,
+          max: 1,
+          aggFilter: 'terms'
+        },
+        {
+          group: 'buckets',
+          name: 'docvalue',
+          title: 'Docvalue',
+          min: 1,
+          max: 1,
+          aggFilter: 'terms'
+        },
+        {
+          group: 'buckets',
+          name: 'symbolcolor',
+          title: 'SymbolColor',
+          min: 1,
+          max: 1,
+          aggFilter: 'terms'
+        }
+      ])
+    } 
   });
 }
-
 VisTypesRegistryProvider.register(BmapVisType);
-
 export default BmapVisType;
+
